@@ -1,157 +1,50 @@
-import socket
-
-def port_scanner(ip, port):
-
-try:
-
-with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-
-s.settimeout(1) # Timeout for connection
-
-s.connect((ip, port))
-
-print(f"[+] Port {port} is OPEN on {ip}")
-
-except:
-
-print(f"[-] Port {port} is CLOSED on {ip}")
-
-# Example Usage
-
-ip = "8.8.8.8" # Localhost
-
-for port in range(45,55):
-
-port_scanner(ip, port)
-
-
-
-
-
-from datetime import datetime
-
-def capture_input():
-
-# Prompt user for input and allow multiple entries
-
-while True:
-
-user_input = input("Please type something (type 'exit' to stop): ")
-
-if user_input.lower() == 'exit':
-
-print("Exiting input capture.")
-
-break
-
-# Open the file in append mode and log the input with a timestamp
-
-timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
-with open("keylog.txt", "a") as f:
-
-f.write(f"[{timestamp}] {user_input}\n")
-
-print(f"Captured input: {user_input}")
-
-# Call the function to start capturing input
-
-capture_input()
-
-
-import requests
-
-def check_sql_injection(url, param):
-
-payload = f"{url}?{param}=' OR 1=1 --"
-
-response = requests.get(payload)
-
-if "error" in response.text or "syntax" in response.text:
-
-print(f"Potential SQL injection vulnerability at: {payload}")
-
-else:
-
-print(f"Seems safe: {url}")
-
-# Example Usage
-
-check_sql_injection("https://portal.naanmudhalvan.tn.gov.in/login", "login")
-
-check_sql_injection("http://example.com/search", "query")
-
-check_sql_injection("http://testphp.vulnweb.com/login.php", "username")
-
-check_sql_injection("http://testphp.vulnweb.com/search.php", "search")
-
-
-import time
-
-# Define the secret key
-
-secret_key = 123456
-
-def generate_otp():
-
-return str((int(time.time()) + secret_key) % 1000000).zfill(6)
-
-# User login and OTP check
-
-password = input("Enter your password: ")
-
-if password == "12345":
-
-otp = generate_otp()
-
-print(f"Your OTP is: {otp}")
-
-user_otp = input("Enter the OTP: ")
-
-if user_otp == otp:
-
-print("Authentication complete.")
-
-else:
-
-print("Invalid OTP.")
-
-else:
-
-print("Incorrect password.")
-
-
-
-def caesar_cipher(message, shift, mode='encrypt'):
-
-result = ""
-
-for char in message:
-
-if char.isalpha():
-
-shift_base = 65 if char.isupper() else 97
-
-shift_value = shift if mode == 'encrypt' else -shift
-
-result += chr((ord(char) - shift_base + shift_value) % 26 + shift_base)
-
-else:
-
-result += char
-
-return result
-
-# Example usage
-
-message = input("Enter the message: ")
-
-shift = int(input("Enter the shift value: "))
-
-encrypted_message = caesar_cipher(message, shift, 'encrypt')
-
-print(f"Encrypted message: {encrypted_message}")
-
-decrypted_message = caesar_cipher(encrypted_message, shift, 'decrypt')
-
-print(f"Decrypted message: {decrypted_message}")
+import javax.crypto.Cipher;
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+import java.util.Base64;
+
+public class EavesdroppingProtection {
+    // Generate AES key
+    private static SecretKey generateAESKey() throws Exception {
+        KeyGenerator keyGen = KeyGenerator.getInstance("AES");
+        keyGen.init(128); // AES supports key sizes of 128, 192, or 256 bits
+        return keyGen.generateKey();
+    }
+
+    // Encrypt a message using AES
+    private static String encrypt(String plainText, SecretKey secretKey) throws Exception {
+        Cipher cipher = Cipher.getInstance("AES");
+        cipher.init(Cipher.ENCRYPT_MODE, secretKey);
+        byte[] encryptedBytes = cipher.doFinal(plainText.getBytes());
+        return Base64.getEncoder().encodeToString(encryptedBytes);
+    }
+
+    // Decrypt a message using AES
+    private static String decrypt(String encryptedText, SecretKey secretKey) throws Exception {
+        Cipher cipher = Cipher.getInstance("AES");
+        cipher.init(Cipher.DECRYPT_MODE, secretKey);
+        byte[] decryptedBytes = cipher.doFinal(Base64.getDecoder().decode(encryptedText));
+        return new String(decryptedBytes);
+    }
+
+    public static void main(String[] args) {
+        try {
+            // Step 1: Generate AES Key
+            SecretKey secretKey = generateAESKey();
+            
+            // Step 2: Sender encrypts the message
+            String originalMessage = "This is a secure message.";
+            System.out.println("Original Message: " + originalMessage);
+            String encryptedMessage = encrypt(originalMessage, secretKey);
+            System.out.println("Encrypted Message: " + encryptedMessage);
+
+            // Step 3: Receiver decrypts the message
+            String decryptedMessage = decrypt(encryptedMessage, secretKey);
+            System.out.println("Decrypted Message: " + decryptedMessage);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
